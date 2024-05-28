@@ -5,18 +5,15 @@ use warnings;
 
 use JSON::PP;
 use LWP::UserAgent;
-use LWP::Authen::OAuth;
 
 our $VERSION = "0.01";
 
 my $URL = 'https://mt-auto-minhon-mlt.ucri.jgn-x.jp/api/mt/';
+my $tokenURL = 'https://mt-auto-minhon-mlt.ucri.jgn-x.jp/oauth2/token.php';
 
 sub new {
     my ($class, $name, $key, $secret) = @_;
-    my $ua = LWP::Authen::OAuth->new(
-        oauth_consumer_key => $key,
-        oauth_consumer_secret => $secret,
-        );
+    my $ua = LWP::UserAgent->new();
     my $self = {
         name => $name,
         key => $key,
@@ -28,10 +25,35 @@ sub new {
     return $self;
 }
 
+sub get_token {
+    my ($self) = @_;
+
+    my $res = $self->{ua}->post($tokenURL, [
+        grant_type => 'client_credentials',
+        client_id => $self->{key},
+        client_secret => $self->{secret},
+    ]);
+
+    if($res->is_success){
+        my $data = $res->content;
+        my $ret = decode_json($data);
+        $self->{token} = $ret->{access_token};
+    }
+    return $res;
+}
+
 sub translate {
     my ($self, $type, $text) = @_;
 
+    if(!defined $self->{token}){
+        my $res1 = $self->get_token();
+        if(!$res1->is_success){
+            return ($res1, undef);
+        }
+    }
+
     my $param = {
+        access_token => $self->{token},
         key => $self->{key},
         type => 'json',
         name => $self->{name},
