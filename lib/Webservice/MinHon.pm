@@ -96,7 +96,25 @@ WebService::MinHon - Perl Interface to Minna-no-Jidou-Honyaku@TexTra
 
 =head1 DESCRIPTION
 
-WebService::MinHon is Perl interface to Minna-no-Jidou-Honyaku@TexTra.
+WebService::MinHon is Perl interface to Minna-no-Jidou-Honyaku@TexTra
+(みんなの自動翻訳＠TexTra).
+
+=head1 METHOD
+
+=over 4
+
+=item $ua = WebService::MinHon->new($userID, $APIkey, $APIsecret)
+
+Constructor.
+
+=item ($res, $ret) = $ua->translate($type, $text)
+
+Call the translation API.
+
+Return a list consisting of the L<LWP::Response> object ($res) and a hash
+converted from the return value of the API ($ret).
+
+=back
 
 =head1 LICENSE
 
